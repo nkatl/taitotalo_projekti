@@ -15,9 +15,6 @@ icon = pygame.image.load('images/icon.png')
 pygame.display.set_icon(icon)
 pygame.display.set_caption('Cosmofight')
 
-# making an object in the middle of the screen
-# object_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-
 x, y = 50, 300
 speed = 7
 player = pygame.image.load('images/ship.png').convert_alpha()
