@@ -28,17 +28,14 @@ enemy_list = []
 enemy_health_list = []
 hit_enemy = pygame.mixer.Sound('sounds/kick.mp3')
 enemy_timer = pygame.USEREVENT + 1
-# pygame.time.set_timer(enemy_timer, 2000)
 
 enemy_bullet = pygame.image.load('images/flake.png').convert_alpha()
 enemy_bullet_list = []
 enemy_bullet_timer = pygame.USEREVENT + 3
-# pygame.time.set_timer(enemy_bullet_timer, 1650)
 
 meteor = pygame.image.load('images/meteor.png').convert_alpha()
 meteor_list = []
 meteor_timer = pygame.USEREVENT + 2
-# pygame.time.set_timer(meteor_timer, 1500)
 meteor_angles = []  # list to store rotation angles for each enemy
 
 bg = pygame.image.load('images/bg.png').convert()
@@ -62,24 +59,24 @@ description = prompt.render('- after three hits, the game will be over', True, (
 description_2 = prompt.render('on collision with -', True, (109, 108, 108))
 description_3 = prompt.render('gameover', True, (109, 108, 108))
 
-
 # text on screen in case of lose
 game_over = label.render('Game Over', False, (220, 41, 13))
 play_again = label.render('Play Again', True, (98, 221, 89))
 play_again_rect = play_again.get_rect(topleft=(360, 430))
 menu = label.render('Main Menu', True, (98, 221, 89))
 menu_rect = menu.get_rect(topleft=(360, 560))
-# your_score = label.render(f'Your score: {score}', False, ())
 
 score = 0
 points = pygame.font.Font('fonts/Orbitron-VariableFont_wght.ttf', 25)
 
 
 def render_score(score):
+    # сounts points and displays them on the screen during the game for meteors and enemy ships shot down
     return points.render(f"Score: {score}", True, (175, 175, 175))
 
 
 def show_score(score):
+    # showing all earned points on gameover screen
     return label.render(f'Your score: {score}', False, (109, 108, 108))
 
 
@@ -133,7 +130,7 @@ while running:
         screen.blit(game_start, game_start_rect)
         screen.blit(exit_game, exit_game_rect)
 
-        mouse = pygame.mouse.get_pos()
+        mouse = pygame.mouse.get_pos()  # current position of the mouse
         if game_start_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
             main_menu = False
             gameplay = True
@@ -144,17 +141,9 @@ while running:
 
         elif exit_game_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
             running = False
-    # fill the screen with color
-    # screen.fill('green')
-    # display the player and the background pictures
-    # screen.blit(bg, (bg_x, 0))
-    # screen.blit(bg, (bg_x + 1024, 0))
-    # screen.blit(player, (x, y))
-    # screen.blit(render_score(score), (0, 850))
-    # screen.blit(enemy, (enemy_x, 250))    # drawing just one enemy at the time
 
     elif gameplay:
-        life_label = prompt.render(str(player_life), False, (109, 108, 108))
+        life_label = prompt.render(str(player_life), False, (109, 108, 108))    # number of lives
 
         screen.blit(bg, (bg_x, 0))
         screen.blit(bg, (bg_x + 1024, 0))
@@ -205,9 +194,6 @@ while running:
         if bg_x == -1024:
             bg_x = 0
 
-        # render game here
-        # pygame.draw.circle(screen, 'purple', object_pos, 40)    # drawing a circle
-
         keys = pygame.key.get_pressed()  # key binding
         if keys[pygame.K_w]:
             y -= speed
@@ -218,12 +204,9 @@ while running:
         if keys[pygame.K_d]:
             x += speed
 
-        # player can't go off-screen
+        # limiting player movement within the window
         x = max(0, min(x, width - player.get_width()))
         y = max(0, min(y, height - player.get_height()))
-
-        # enemy speed
-        # enemy_x -= 5
 
         # lazer launch
         if lazers:
@@ -301,7 +284,7 @@ while running:
             pygame.time.set_timer(meteor_timer, 1500)
             player_life = 3
 
-        elif menu_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+        elif menu_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:   # back to Main Menu
             main_menu = True
             gameplay = False
             x, y = 50, 300
@@ -314,12 +297,10 @@ while running:
             player_health_list.clear()
             player_life = 3
 
-    # flip() the display to put work on screen
+    # screen update(smooth and correct display of all changes on the screen)
     pygame.display.flip()
 
     # limits FPS to 60
-    # dt is delta time in seconds since last frame,
-    # used for framerate independent physics.
     dt = clock.tick(60)
 
 pygame.quit()
