@@ -7,7 +7,8 @@ Control description can be found in the start window of the game.
 
 ## Installation
 
-You will need [Python](https://www.python.org/downloads/) and the Pygame library to run the game. 
+You will need [Python](https://www.python.org/downloads/) and the Pygame library to run the game.
++ if you do not have Git installed, you can download it from here --> [Git](https://git-scm.com/downloads)
 
 ## Installation steps:
 
