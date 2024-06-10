@@ -13,7 +13,7 @@ You will need [Python](https://www.python.org/downloads/) and the Pygame library
 ## Installation steps:
 
 1.Clone the repository:
-''' sh (Command Prompt) 
+''' sh 
 git clone --branch master https://github.com/nkatl/taitotalo_projekti.git
 '''
 
