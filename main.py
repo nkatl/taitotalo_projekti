@@ -6,53 +6,87 @@ import random
 # pygame setup
 pygame.init()
 
+# set the game screen size
 width, height = 1024, 881
 screen = pygame.display.set_mode((width, height))
+# call the .time method to create the Clock() object, which helps to keep track of the time in the game
 clock = pygame.time.Clock()
+# 'delta time' - amount of time passed between the current and previous frame
 dt = 0
 
+# displaying the icon and game name in the upper left corner of the window
 icon = pygame.image.load('images/icon.png')
 pygame.display.set_icon(icon)
 pygame.display.set_caption('Cosmofight')
 
+# coordinates of the player's appearance on the screen
 x, y = 50, 300
+# player speed
 speed = 7
+# uploading an image of the player
 player = pygame.image.load('images/ship.png').convert_alpha()
+# uploading an image of the player to display health
 player_health = pygame.image.load('images/health.png').convert_alpha()
 player_life = 3
 player_health_list = []
+# uploading sound of explosion
 collision = pygame.mixer.Sound('sounds/explosion.mp3')
 
+# uploading an image of the enemy
 enemy = pygame.image.load('images/enemy.png').convert_alpha()
+# setting enemy list
 enemy_list = []
+# setting enemy health
 enemy_health_list = []
+# uploading hitting sound
 hit_enemy = pygame.mixer.Sound('sounds/kick.mp3')
+# user event creation to make enemies
 enemy_timer = pygame.USEREVENT + 1
 
+# uploading an image of the enemy bullet
 enemy_bullet = pygame.image.load('images/flake.png').convert_alpha()
+# setting enemy bullet list
 enemy_bullet_list = []
+# user event creation to make enemies shoot
 enemy_bullet_timer = pygame.USEREVENT + 3
 
+# uploading an image of the meteor
 meteor = pygame.image.load('images/meteor.png').convert_alpha()
+# setting meteor list
 meteor_list = []
+# user event creation to make meteors
 meteor_timer = pygame.USEREVENT + 2
-meteor_angles = []  # list to store rotation angles for each enemy
+# list to store rotation angles of meteor
+meteor_angles = []
 
+# uploading an image of the background picture
 bg = pygame.image.load('images/bg.png').convert()
+# x-coordinates of the original background location
 bg_x = 0
 
+# uploading an image of the lazer(for player)
 lazer = pygame.image.load('images/lazer.png').convert_alpha()
+# setting lazer list
 lazers = []
+# uploading lazer sound
 lazer_sound = pygame.mixer.Sound('sounds/laser gun.mp3')
 
+# uploading font for start menu and gameover screen
 label = pygame.font.Font('fonts/Orbitron-VariableFont_wght.ttf', 50)
 
 # start menu
+# text creation
 game_start = label.render('Start the Game', True, (98, 221, 89))
+# places a text in a rectangle to allow interaction
 game_start_rect = game_start.get_rect(topleft=(300, 250))
+# text creation
 exit_game = label.render('Exit', True, (98, 221, 89))
+# places a text in a rectangle to allow interaction
 exit_game_rect = exit_game.get_rect(topleft=(445, 420))
+
+# uploading default font to describe the rules on start menu
 prompt = pygame.font.Font(None, 50)
+# text creation
 move = prompt.render('WASD - move', True, (109, 108, 108))
 shoot = prompt.render('SPACE - shoot', True, (109, 108, 108))
 description = prompt.render('- after three hits, the game will be over', True, (109, 108, 108))
@@ -60,13 +94,19 @@ description_2 = prompt.render('on collision with -', True, (109, 108, 108))
 description_3 = prompt.render('gameover', True, (109, 108, 108))
 
 # text on screen in case of lose
+# text creation
 game_over = label.render('Game Over', False, (220, 41, 13))
 play_again = label.render('Play Again', True, (98, 221, 89))
+# places a text in a rectangle to allow interaction
 play_again_rect = play_again.get_rect(topleft=(360, 430))
+# text creation
 menu = label.render('Main Menu', True, (98, 221, 89))
+# places a text in a rectangle to allow interaction
 menu_rect = menu.get_rect(topleft=(360, 560))
 
+# variable for storing earned points
 score = 0
+# uploading font for points
 points = pygame.font.Font('fonts/Orbitron-VariableFont_wght.ttf', 25)
 
 
