@@ -14,26 +14,26 @@ You will need [Python](https://www.python.org/downloads/) and the Pygame library
 
 1.Clone the repository to command prompt:
 
-git clone --branch master https://github.com/nkatl/taitotalo_projekti.git
++ git clone --branch master https://github.com/nkatl/taitotalo_projekti.git
 
 
 2.Navigate to the project directory:
 
-cd taitotalo_projekti
++ cd taitotalo_projekti
 
 
 3.Сreate a virtual environment and activate it:
 
-python -m venv env
++ python -m venv env
 env\Scripts\activate
 
 
 4.Install PyGame library:
 
-pip install pygame
++ pip install pygame
 
 
 ## Game launch:
  
-python main.py
++ python main.py
 
