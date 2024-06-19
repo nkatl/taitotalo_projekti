@@ -86,12 +86,24 @@ exit_game_rect = exit_game.get_rect(topleft=(445, 420))
 
 # uploading default font to describe the rules on start menu
 prompt = pygame.font.Font(None, 50)
+# font for arrows
+arrow_font = pygame.font.SysFont('Calibri', 35)
+# creating variables with keyboard arrows
+up = '\u2191'
+down = '\u2193'
+left = '\u2190'
+right = '\u2192'
+# creating text surfaces for arrows
+text_up = arrow_font.render(up, True, (160, 156, 156))
+text_down = arrow_font.render(down, True, (160, 156, 156))
+text_left = arrow_font.render(left, True, (160, 156, 156))
+text_right = arrow_font.render(right, True, (160, 156, 156))
 # text creation
-move = prompt.render('WASD - move', True, (109, 108, 108))
-shoot = prompt.render('SPACE - shoot', True, (109, 108, 108))
-description = prompt.render('- after three hits, the game will be over', True, (109, 108, 108))
-description_2 = prompt.render('on collision with -', True, (109, 108, 108))
-description_3 = prompt.render('gameover', True, (109, 108, 108))
+move = prompt.render(' - move', True, (160, 156, 156))
+shoot = prompt.render('SPACE - shoot', True, (160, 156, 156))
+description = prompt.render('- after three hits, the game will be over', True, (160, 156, 156))
+description_2 = prompt.render('on collision with -', True, (160, 156, 156))
+description_3 = prompt.render('gameover', True, (160, 156, 156))
 
 # text on screen in case of lose
 # text creation
@@ -124,11 +136,22 @@ main_menu = True
 gameplay = False
 running = True
 
+# main loop
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close window
-    screen.fill((68, 60, 109))
-    screen.blit(move, (100, 500))
+    # screen.fill((68, 60, 109))
+    bg_x -= 2
+    if bg_x == -1024:
+        bg_x = 0
+
+    screen.blit(bg, (bg_x, 0))
+    screen.blit(bg, (bg_x + 1024, 0))
+    screen.blit(text_up, (65, 460))
+    screen.blit(text_down, (65, 510))
+    screen.blit(text_left, (30, 500))
+    screen.blit(text_right, (100, 500))
+    screen.blit(move, (130, 500))
     screen.blit(shoot, (700, 500))
     screen.blit(description, (200, 650))
     screen.blit(enemy_bullet, (180, 660))
@@ -198,7 +221,7 @@ while running:
         if enemy_list:
             for (i, el) in enumerate(enemy_list):
                 screen.blit(enemy, el)
-                el.x -= 5
+                el.x -= 7
 
                 if el.x < -10:
                     enemy_list.pop(i)
@@ -235,13 +258,13 @@ while running:
             bg_x = 0
 
         keys = pygame.key.get_pressed()  # key binding
-        if keys[pygame.K_w]:
+        if keys[pygame.K_UP]:
             y -= speed
-        if keys[pygame.K_s]:
+        if keys[pygame.K_DOWN]:
             y += speed
-        if keys[pygame.K_a]:
+        if keys[pygame.K_LEFT]:
             x -= speed
-        if keys[pygame.K_d]:
+        if keys[pygame.K_RIGHT]:
             x += speed
 
         # limiting player movement within the window
@@ -285,7 +308,7 @@ while running:
         if enemy_bullet_list:
             for (f, el) in enumerate(enemy_bullet_list):
                 screen.blit(enemy_bullet, (el.x, el.y))
-                el.x -= 10  # bullet speed
+                el.x -= 12  # bullet speed
 
                 if el.x < -10:  # deleting bullet if it goes off the screen
                     enemy_bullet_list.pop(f)
@@ -300,7 +323,13 @@ while running:
 
     else:
         # gameover screen
-        screen.fill((68, 60, 109))
+        # screen.fill((68, 60, 109))
+        # bg_x -= 2
+        # if bg_x == -1024:
+        #     bg_x = 0
+
+        screen.blit(bg, (bg_x, 0))
+        screen.blit(bg, (bg_x + 1024, 0))
         screen.blit(game_over, (360, 50))
         screen.blit(show_score(score), (300, 240))
         screen.blit(play_again, (play_again_rect))
