@@ -120,6 +120,8 @@ menu_rect = menu.get_rect(topleft=(360, 560))
 score = 0
 # uploading font for points
 points = pygame.font.Font('fonts/Orbitron-VariableFont_wght.ttf', 25)
+best_result = 0
+highscore = points.render(f"Best result: {best_result}", True, (175, 175, 175))
 
 
 def render_score(score):
@@ -370,6 +372,6 @@ while running:
     pygame.display.flip()
 
     # limits FPS to 60
-    dt = clock.tick(60)
+    dt = clock.tick(60) / 1000
 
 pygame.quit()
