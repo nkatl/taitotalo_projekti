@@ -1,5 +1,6 @@
 # arcade side-scrolling shooter
 
+import asyncio
 import pygame
 import random
 
@@ -139,287 +140,298 @@ gameplay = False
 # flag indicating that the game window is running
 running = True
 
-# main loop
-while running:
+async def main_loop():
+    global main_menu, gameplay, running, bg_x, x, y, player_life, score, player
 
-    # moving background screen
-    bg_x -= 2
-    if bg_x == -1024:
-        bg_x = 0
+    # main loop
+    while running:
 
-    # background design
-    screen.blit(bg, (bg_x, 0))
-    screen.blit(bg, (bg_x + 1024, 0))
-    # displaying the control description in the main menu
-    screen.blit(text_up, (65, 460))
-    screen.blit(text_down, (65, 510))
-    screen.blit(text_left, (30, 500))
-    screen.blit(text_right, (100, 500))
-    screen.blit(move, (130, 500))
-    screen.blit(shoot, (700, 500))
-    # displaying a description of enemy bullet hits
-    screen.blit(description, (200, 650))
-    screen.blit(enemy_bullet, (180, 660))
-
-    # event processing
-    for event in pygame.event.get():
-        # pygame.QUIT means the user clicked X to close window
-        if event.type == pygame.QUIT:
-            running = False
-
-        # gameplay flag active
-        if gameplay:
-            # enemy spawn event
-            if event.type == enemy_timer:
-                # generating random Y coordinate
-                enemy_y = random.randint(0, height - enemy.get_height())
-                # creating a rectangle around an enemy
-                enemy_list.append(enemy.get_rect(topleft=(1026, enemy_y)))
-                # giving new enemy 2 health with spawn
-                enemy_health_list.append(2)
-
-            # enemy bullet spawn event
-            if event.type == enemy_bullet_timer:
-                # if no enemies, no shooting
-                if enemy_list:
-                    # choosing a random enemy who's going to shoot
-                    shooting_enemy = random.choice(enemy_list)
-                    # making enemy bullet as an object and placing it on enemy position
-                    enemy_bullet_list.append(enemy_bullet.get_rect(topleft=
-                                                                   (shooting_enemy.x,
-                                                                    shooting_enemy.y + enemy.get_height() //
-                                                                    2)))
-                    # creating three lives for the player
-                    player_health_list.append(3)
-
-            # meteor spawn event
-            if event.type == meteor_timer:
-                # generating random Y coordinate for spawn
-                meteor_y = random.randint(0, height - meteor.get_height())
-                # creating a rectangle around the meteor
-                new_meteor = meteor.get_rect(topleft=(1025, meteor_y))
-                meteor_list.append(new_meteor)
-                meteor_angles.append(0)  # Initialize rotation angle for new meteor
-
-        # creating a lazer shot event
-        # if player press SPACE button laser will be fired
-        if gameplay and event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-            lazer_sound.play()  # when pressing SPACE button, laser sound play
-            lazers.append(lazer.get_rect(topleft=(x + 40, y + 30)))  # rectangle around laser
-
-    if main_menu:
-        # displaying interactive buttons for starting and exit the game in the main menu
-        screen.blit(game_start, game_start_rect)
-        screen.blit(exit_game, exit_game_rect)
-
-        mouse = pygame.mouse.get_pos()  # current position of the mouse
-
-        # if player press with mouse on Start the Game button
-        if game_start_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
-            main_menu = False
-            gameplay = True
-            # timers for enemy spawning, bullets and meteorites are set when game starts
-            pygame.time.set_timer(enemy_timer, 2000)
-            pygame.time.set_timer(enemy_bullet_timer, 1650)
-            pygame.time.set_timer(meteor_timer, 1500)
-
-        # if player press with mouse on Exit button
-        elif exit_game_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
-            running = False
-
-    elif gameplay:
-        # definition of font and its color for player lives
-        life_label = prompt.render(str(player_life), False, (109, 108, 108))
-
-        # displaying background
-        screen.blit(bg, (bg_x, 0))
-        screen.blit(bg, (bg_x + 1024, 0))
-        # displaying player
-        screen.blit(player, (x, y))
-        # displaying players current score
-        screen.blit(render_score(score), (0, 850))
-        # displaying players lives
-        screen.blit(life_label, (30, 0))
-        screen.blit(player_health, (0, 0))
-
-        # drawing around player rectangle
-        player_rect = player.get_rect(topleft=(x, y))
-
-        # if enemy spawned
-        if enemy_list:
-            for (i, el) in enumerate(enemy_list):
-                # displaying enemy
-                screen.blit(enemy, el)
-                # enemy speed
-                el.x -= 7
-
-                # condition when enemy flies off the screen
-                if el.x < -10:
-                    # deleting enemy from the playing screen
-                    enemy_list.pop(i)
-                    enemy_health_list.pop(i)
-
-                # condition, when player interacts with enemy
-                if player_rect.colliderect(el):
-                    # collision sound play
-                    collision.play()
-                    # game ends
-                    gameplay = False
-
-        # if meteor spawned
-        if meteor_list:
-            for (i, el) in enumerate(meteor_list):
-                # value to control rotation speed
-                meteor_angles[i] += 2
-                # rotating meteor image by an angle of meteor_angles[i]
-                rotated_meteor = pygame.transform.rotate(meteor, meteor_angles[i])
-                # creates a rectangle around meteor
-                rotated_meteor_rect = rotated_meteor.get_rect(center=el.center)
-                # displaying rotation of the meteor
-                screen.blit(rotated_meteor, rotated_meteor_rect.topleft)
-
-                el.x -= 10  # meteor speed
-
-                # condition when meteor flies off the screen
-                if el.x < -10:
-                    # deleting meteor from the playing screen
-                    meteor_list.pop(i)
-                    meteor_angles.pop(i)
-
-                # when player collides with meteor
-                if player_rect.colliderect(rotated_meteor_rect):
-                    # collision sound play
-                    collision.play()
-                    # game ends
-                    gameplay = False
-
-        # moving background
+        # moving background screen
         bg_x -= 2
         if bg_x == -1024:
             bg_x = 0
 
-        # key binding
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
-            y -= speed
-        if keys[pygame.K_DOWN]:
-            y += speed
-        if keys[pygame.K_LEFT]:
-            x -= speed
-        if keys[pygame.K_RIGHT]:
-            x += speed
-
-        # limiting player movement within the window
-        x = max(0, min(x, width - player.get_width()))
-        y = max(0, min(y, height - player.get_height()))
-
-        # lazer launch
-        if lazers:
-            for (i, el) in enumerate(lazers):
-                # displaying laser
-                screen.blit(lazer, (el.x, el.y))
-                el.x += 10  # laser speed
-
-                # deleting lazer if it goes of the screen
-                if el.x > 1030:
-                    lazers.pop(i)
-
-                # condition of interaction lasers with enemies
-                if enemy_list:
-                    for (j, enemy_el) in enumerate(enemy_list):
-                        # if laser collides with enemy
-                        if el.colliderect(enemy_el):
-                            hit_enemy.play()   # hit sound play
-                            enemy_health_list[j] -= 1  # enemy have 2 health
-                            lazers.pop(i)   # deleting laser from the game
-                            # if laser hits enemy 2 times
-                            if enemy_health_list[j] <= 0:
-                                hit_enemy.play()    # hit sound play
-                                enemy_list.pop(j)   # deleting enemy
-                                enemy_health_list.pop(j)
-                                score += 300    # adding points
-                                # score_label = render_score(score)   # and displaying them on the screen
-                            break
-
-                # condition of interaction lasers with meteors
-                if meteor_list:
-                    for (m, meteor_el) in enumerate(meteor_list):
-                        # if laser collides with meteor
-                        if el.colliderect(meteor_el):
-                            meteor_list.pop(m)  # deleting meteor from the game
-                            lazers.pop(i)   # deleting laser from the game
-                            score += 200    # adding points
-                            break
-
-        # enemy bullet launch
-        if enemy_bullet_list:
-            for (f, el) in enumerate(enemy_bullet_list):
-                # displaying enemy bullet
-                screen.blit(enemy_bullet, (el.x, el.y))
-                el.x -= 12  # bullet speed
-
-                if el.x < -10:  # deleting bullet if it goes off the screen
-                    enemy_bullet_list.pop(f)
-
-                if player_rect.colliderect(el):  # if bullet interacts with player, -health
-                    enemy_bullet_list.pop(f)    # deleting bullet from the game
-                    player_health_list[f] -= 1  # subtraction of 1 life from list
-                    player_life -= 1    # subtraction of 1 life from screen
-
-                    if player_health_list[f] <= 0:  # if player lives has gone
-                        collision.play()    # collision sound play
-                        gameplay = False    # game ends
-
-    else:
-        # game over screen
+        # background design
         screen.blit(bg, (bg_x, 0))
         screen.blit(bg, (bg_x + 1024, 0))
-        screen.blit(game_over, (360, 50))
-        # total score for played game
-        screen.blit(show_score(score), (300, 240))
-        # interaction buttons to play again and to go back to main menu
-        screen.blit(play_again, (play_again_rect))
-        screen.blit(menu, (menu_rect))
+        # displaying the control description in the main menu
+        screen.blit(text_up, (65, 460))
+        screen.blit(text_down, (65, 510))
+        screen.blit(text_left, (30, 500))
+        screen.blit(text_right, (100, 500))
+        screen.blit(move, (130, 500))
+        screen.blit(shoot, (700, 500))
+        # displaying a description of enemy bullet hits
+        screen.blit(description, (200, 650))
+        screen.blit(enemy_bullet, (180, 660))
 
-        # binding mouse key to restart the game
-        mouse = pygame.mouse.get_pos()
-        # when pressing the button (with LMB) new game starts
-        if play_again_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
-            gameplay = True
-            # deleting objects from the last game and resetting the player's location and scores to default
-            x, y = 50, 300
-            player = pygame.image.load('images/ship.png').convert_alpha()
-            enemy_list.clear()
-            lazers.clear()
-            meteor_list.clear()
-            enemy_bullet_list.clear()
-            score = 0
-            player_health_list.clear()
-            pygame.time.set_timer(enemy_timer, 2000)
-            pygame.time.set_timer(enemy_bullet_timer, 1650)
-            pygame.time.set_timer(meteor_timer, 1500)
-            player_life = 3
+        # event processing
+        for event in pygame.event.get():
+            # pygame.QUIT means the user clicked X to close window
+            if event.type == pygame.QUIT:
+                running = False
 
-        # when pressing the button (with LMB) going back to main menu
-        elif menu_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
-            main_menu = True
-            gameplay = False
-            # deleting objects from the last game and resetting the player's location and scores to default
-            x, y = 50, 300
-            player = pygame.image.load('images/ship.png').convert_alpha()
-            enemy_list.clear()
-            lazers.clear()
-            meteor_list.clear()
-            enemy_bullet_list.clear()
-            score = 0
-            player_health_list.clear()
-            player_life = 3
+            # gameplay flag active
+            if gameplay:
+                # enemy spawn event
+                if event.type == enemy_timer:
+                    # generating random Y coordinate
+                    enemy_y = random.randint(0, height - enemy.get_height())
+                    # creating a rectangle around an enemy
+                    enemy_list.append(enemy.get_rect(topleft=(1026, enemy_y)))
+                    # giving new enemy 2 health with spawn
+                    enemy_health_list.append(2)
 
-    # screen update(smooth and correct display of all changes on the screen)
-    pygame.display.flip()
+                # enemy bullet spawn event
+                if event.type == enemy_bullet_timer:
+                    # if no enemies, no shooting
+                    if enemy_list:
+                        # choosing a random enemy who's going to shoot
+                        shooting_enemy = random.choice(enemy_list)
+                        # making enemy bullet as an object and placing it on enemy position
+                        enemy_bullet_list.append(enemy_bullet.get_rect(topleft=
+                                                                       (shooting_enemy.x,
+                                                                        shooting_enemy.y + enemy.get_height() //
+                                                                        2)))
+                        # creating three lives for the player
+                        player_health_list.append(3)
 
-    # limits FPS to 60
-    dt = clock.tick(60) / 1000
+                # meteor spawn event
+                if event.type == meteor_timer:
+                    # generating random Y coordinate for spawn
+                    meteor_y = random.randint(0, height - meteor.get_height())
+                    # creating a rectangle around the meteor
+                    new_meteor = meteor.get_rect(topleft=(1025, meteor_y))
+                    meteor_list.append(new_meteor)
+                    meteor_angles.append(0)  # Initialize rotation angle for new meteor
 
-# shutting down pygame
-pygame.quit()
+            # creating a lazer shot event
+            # if player press SPACE button laser will be fired
+            if gameplay and event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+                lazer_sound.play()  # when pressing SPACE button, laser sound play
+                lazers.append(lazer.get_rect(topleft=(x + 40, y + 30)))  # rectangle around laser
+
+        if main_menu:
+            # displaying interactive buttons for starting and exit the game in the main menu
+            screen.blit(game_start, game_start_rect)
+            screen.blit(exit_game, exit_game_rect)
+
+            mouse = pygame.mouse.get_pos()  # current position of the mouse
+
+            # if player press with mouse on Start the Game button
+            if game_start_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                main_menu = False
+                gameplay = True
+                # timers for enemy spawning, bullets and meteorites are set when game starts
+                pygame.time.set_timer(enemy_timer, 2000)
+                pygame.time.set_timer(enemy_bullet_timer, 1650)
+                pygame.time.set_timer(meteor_timer, 1500)
+
+            # if player press with mouse on Exit button
+            elif exit_game_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                running = False
+
+        elif gameplay:
+            # definition of font and its color for player lives
+            life_label = prompt.render(str(player_life), False, (109, 108, 108))
+
+            # displaying background
+            screen.blit(bg, (bg_x, 0))
+            screen.blit(bg, (bg_x + 1024, 0))
+            # displaying player
+            screen.blit(player, (x, y))
+            # displaying players current score
+            screen.blit(render_score(score), (0, 850))
+            # displaying players lives
+            screen.blit(life_label, (30, 0))
+            screen.blit(player_health, (0, 0))
+
+            # drawing around player rectangle
+            player_rect = player.get_rect(topleft=(x, y))
+
+            # if enemy spawned
+            if enemy_list:
+                for (i, el) in enumerate(enemy_list):
+                    # displaying enemy
+                    screen.blit(enemy, el)
+                    # enemy speed
+                    el.x -= 7
+
+                    # condition when enemy flies off the screen
+                    if el.x < -10:
+                        # deleting enemy from the playing screen
+                        enemy_list.pop(i)
+                        enemy_health_list.pop(i)
+
+                    # condition, when player interacts with enemy
+                    if player_rect.colliderect(el):
+                        # collision sound play
+                        collision.play()
+                        # game ends
+                        gameplay = False
+
+            # if meteor spawned
+            if meteor_list:
+                for (i, el) in enumerate(meteor_list):
+                    # value to control rotation speed
+                    meteor_angles[i] += 2
+                    # rotating meteor image by an angle of meteor_angles[i]
+                    rotated_meteor = pygame.transform.rotate(meteor, meteor_angles[i])
+                    # creates a rectangle around meteor
+                    rotated_meteor_rect = rotated_meteor.get_rect(center=el.center)
+                    # displaying rotation of the meteor
+                    screen.blit(rotated_meteor, rotated_meteor_rect.topleft)
+
+                    el.x -= 10  # meteor speed
+
+                    # condition when meteor flies off the screen
+                    if el.x < -10:
+                        # deleting meteor from the playing screen
+                        meteor_list.pop(i)
+                        meteor_angles.pop(i)
+
+                    # when player collides with meteor
+                    if player_rect.colliderect(rotated_meteor_rect):
+                        # collision sound play
+                        collision.play()
+                        # game ends
+                        gameplay = False
+
+            # moving background
+            bg_x -= 2
+            if bg_x == -1024:
+                bg_x = 0
+
+            # key binding
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_UP]:
+                y -= speed
+            if keys[pygame.K_DOWN]:
+                y += speed
+            if keys[pygame.K_LEFT]:
+                x -= speed
+            if keys[pygame.K_RIGHT]:
+                x += speed
+
+            # limiting player movement within the window
+            x = max(0, min(x, width - player.get_width()))
+            y = max(0, min(y, height - player.get_height()))
+
+            # lazer launch
+            if lazers:
+                for (i, el) in enumerate(lazers):
+                    # displaying laser
+                    screen.blit(lazer, (el.x, el.y))
+                    el.x += 10  # laser speed
+
+                    # deleting lazer if it goes of the screen
+                    if el.x > 1030:
+                        lazers.pop(i)
+
+                    # condition of interaction lasers with enemies
+                    if enemy_list:
+                        for (j, enemy_el) in enumerate(enemy_list):
+                            # if laser collides with enemy
+                            if el.colliderect(enemy_el):
+                                hit_enemy.play()   # hit sound play
+                                enemy_health_list[j] -= 1  # enemy have 2 health
+                                lazers.pop(i)   # deleting laser from the game
+                                # if laser hits enemy 2 times
+                                if enemy_health_list[j] <= 0:
+                                    hit_enemy.play()    # hit sound play
+                                    enemy_list.pop(j)   # deleting enemy
+                                    enemy_health_list.pop(j)
+                                    score += 300    # adding points
+                                    # score_label = render_score(score)   # and displaying them on the screen
+                                break
+
+                    # condition of interaction lasers with meteors
+                    if meteor_list:
+                        for (m, meteor_el) in enumerate(meteor_list):
+                            # if laser collides with meteor
+                            if el.colliderect(meteor_el):
+                                meteor_list.pop(m)  # deleting meteor from the game
+                                lazers.pop(i)   # deleting laser from the game
+                                score += 200    # adding points
+                                break
+
+            # enemy bullet launch
+            if enemy_bullet_list:
+                for (f, el) in enumerate(enemy_bullet_list):
+                    # displaying enemy bullet
+                    screen.blit(enemy_bullet, (el.x, el.y))
+                    el.x -= 12  # bullet speed
+
+                    if el.x < -10:  # deleting bullet if it goes off the screen
+                        enemy_bullet_list.pop(f)
+
+                    if player_rect.colliderect(el):  # if bullet interacts with player, -health
+                        enemy_bullet_list.pop(f)    # deleting bullet from the game
+                        player_health_list[f] -= 1  # subtraction of 1 life from list
+                        player_life -= 1    # subtraction of 1 life from screen
+
+                        if player_health_list[f] <= 0:  # if player lives has gone
+                            collision.play()    # collision sound play
+                            gameplay = False    # game ends
+
+        else:
+            # game over screen
+            screen.blit(bg, (bg_x, 0))
+            screen.blit(bg, (bg_x + 1024, 0))
+            screen.blit(game_over, (360, 50))
+            # total score for played game
+            screen.blit(show_score(score), (300, 240))
+            # interaction buttons to play again and to go back to main menu
+            screen.blit(play_again, (play_again_rect))
+            screen.blit(menu, (menu_rect))
+
+            # binding mouse key to restart the game
+            mouse = pygame.mouse.get_pos()
+            # when pressing the button (with LMB) new game starts
+            if play_again_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                gameplay = True
+                # deleting objects from the last game and resetting the player's location and scores to default
+                x, y = 50, 300
+                player = pygame.image.load('images/ship.png').convert_alpha()
+                enemy_list.clear()
+                lazers.clear()
+                meteor_list.clear()
+                enemy_bullet_list.clear()
+                score = 0
+                player_health_list.clear()
+                pygame.time.set_timer(enemy_timer, 2000)
+                pygame.time.set_timer(enemy_bullet_timer, 1650)
+                pygame.time.set_timer(meteor_timer, 1500)
+                player_life = 3
+
+            # when pressing the button (with LMB) going back to main menu
+            elif menu_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                main_menu = True
+                gameplay = False
+                # deleting objects from the last game and resetting the player's location and scores to default
+                x, y = 50, 300
+                player = pygame.image.load('images/ship.png').convert_alpha()
+                enemy_list.clear()
+                lazers.clear()
+                meteor_list.clear()
+                enemy_bullet_list.clear()
+                score = 0
+                player_health_list.clear()
+                player_life = 3
+
+        await asyncio.sleep(0)
+
+        # screen update(smooth and correct display of all changes on the screen)
+        pygame.display.flip()
+
+        # limits FPS to 60
+        dt = clock.tick(60) / 1000
+
+async def main():
+    pygame.time.set_timer(enemy_timer, 2000)
+    pygame.time.set_timer(enemy_bullet_timer, 1500)
+    pygame.time.set_timer(meteor_timer, 3000)
+    await main_loop()
+    pygame.quit()   # shutting down pygame
+
+asyncio.run(main())
